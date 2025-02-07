@@ -1,0 +1,26 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+  
+  #videoPlayer {
+    border: 1px solid #ccc;
+    margin-top: 20px;
+  }
+  
+  #chat {
+    margin-top: 20px;
+  }
+  
+  #messages {
+    list-style: none;
+    padding: 0;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  
+  li {
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+  }
+  

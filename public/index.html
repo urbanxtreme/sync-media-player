@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sync Video Player 🎥</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Sync Video Player 🎥</h1>
+  
+  <div id="session-controls">
+    <button id="createSession">Create Session</button>
+    <input type="text" id="sessionIdInput" placeholder="Enter Session ID">
+    <button id="joinSession">Join Session</button>
+  </div>
+
+  <video id="videoPlayer" width="600" controls>
+    <source id="videoSource" type="video/mp4">
+  </video>
+
+  <br>
+  <input type="file" id="videoFile" accept="video/*">
+  <button id="loadVideo">Load Video</button>
+
+  <div id="chat">
+    <ul id="messages"></ul>
+    <input id="messageInput" placeholder="Type a message...">
+    <button id="sendButton">Send</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="player.js"></script>
+</body>
+</html>
