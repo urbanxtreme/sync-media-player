@@ -9,55 +9,85 @@ const io = new Server(server);
 
 app.use(express.static('public'));
 
-const sessions = {};
+const sessions = new Map();
 
 io.on('connection', (socket) => {
     console.log('New user connected:', socket.id);
 
-    socket.on('create-session', () => {
+    let currentSession = null;
+
+    socket.on('create-session', (userName) => {
         const sessionId = uuidv4();
-        sessions[sessionId] = { clients: [] };
+        sessions.set(sessionId, {
+            participants: [{
+                id: socket.id,
+                name: userName,
+                isHost: true
+            }],
+            hostName: userName
+        });
+        
         socket.join(sessionId);
-        sessions[sessionId].clients.push(socket.id);
+        currentSession = sessionId;
         socket.emit('session-created', sessionId);
-        console.log(`Session created: ${sessionId}`);
+        updateParticipants(sessionId);
+        console.log(`Session created: ${sessionId} by ${userName}`);
     });
 
-    socket.on('join-session', (sessionId) => {
-        if (sessions[sessionId]) {
+    socket.on('join-session', ({ sessionId, userName }) => {
+        if (sessions.has(sessionId)) {
+            const session = sessions.get(sessionId);
+            session.participants.push({
+                id: socket.id,
+                name: userName,
+                isHost: false
+            });
+            
             socket.join(sessionId);
-            sessions[sessionId].clients.push(socket.id);
+            currentSession = sessionId;
             socket.emit('session-joined', sessionId);
-            console.log(`User joined session: ${sessionId}`);
+            updateParticipants(sessionId);
+            console.log(`${userName} joined session: ${sessionId}`);
         } else {
-            socket.emit('error', 'Invalid session ID');
+            socket.emit('session-error', 'Invalid session ID');
         }
     });
 
     socket.on('video-control', (data) => {
-        const { sessionId, action, time } = data;
-        socket.to(sessionId).emit('video-control', { action, time });
+        socket.to(data.sessionId).emit('video-control', data);
     });
 
     socket.on('chat-message', (data) => {
-        const { sessionId, message } = data;
-        io.to(sessionId).emit('chat-message', message);
+        io.to(data.sessionId).emit('chat-message', data.message);
     });
 
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
-        // Cleanup: Remove user from any sessions
-        for (const sessionId in sessions) {
-            const index = sessions[sessionId].clients.indexOf(socket.id);
-            if (index !== -1) {
-                sessions[sessionId].clients.splice(index, 1);
-                if (sessions[sessionId].clients.length === 0) {
-                    delete sessions[sessionId];
-                }
-                break;
+        if (currentSession && sessions.has(currentSession)) {
+            const session = sessions.get(currentSession);
+            session.participants = session.participants.filter(
+                p => p.id !== socket.id
+            );
+            
+            if (session.participants.length === 0) {
+                sessions.delete(currentSession);
+            } else {
+                updateParticipants(currentSession);
             }
         }
     });
+
+    function updateParticipants(sessionId) {
+        const session = sessions.get(sessionId);
+        if (session) {
+            io.to(sessionId).emit('update-participants', 
+                session.participants.map(p => ({
+                    name: p.name,
+                    isHost: p.isHost
+                }))
+            );
+        }
+    }
 });
 
 const PORT = 3000;

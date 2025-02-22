@@ -1,35 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sync Video Player 🎥</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <h1>Sync Video Player 🎥</h1>
-  
-  <div id="session-controls">
-    <button id="createSession">Create Session</button>
-    <input type="text" id="sessionIdInput" placeholder="Enter Session ID">
-    <button id="joinSession">Join Session</button>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sync Video Player 🎥</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1><i class="fas fa-film"></i> HVH SyncPlay</h1>
+      </header>
 
-  <video id="videoPlayer" width="600" controls>
-    <source id="videoSource" type="video/mp4">
-  </video>
+      <div class="session-controls card">
+        <button id="createSession" class="btn primary">
+          <i class="fas fa-plus-circle"></i> Create Session
+        </button>
+        <div class="session-input-group">
+          <input
+            type="text"
+            id="sessionIdInput"
+            placeholder="Enter Session ID"
+          />
+          <button id="joinSession" class="btn secondary">
+            <i class="fas fa-sign-in-alt"></i> Join
+          </button>
+        </div>
+      </div>
 
-  <br>
-  <input type="file" id="videoFile" accept="video/*">
-  <button id="loadVideo">Load Video</button>
+      <div id="nameModal" class="modal">
+        <div class="modal-content">
+          <h3>Enter Your Name</h3>
+          <input type="text" id="userName" placeholder="Your name..." />
+          <button id="confirmName" class="btn primary">Continue</button>
+        </div>
+      </div>
 
-  <div id="chat">
-    <ul id="messages"></ul>
-    <input id="messageInput" placeholder="Type a message...">
-    <button id="sendButton">Send</button>
-  </div>
+      <div class="video-container card">
+        <video id="videoPlayer" controls>
+          <source id="videoSource" type="video/mp4" />
+        </video>
+        <div class="video-upload">
+          <label class="file-input">
+            <input type="file" id="videoFile" accept="video/*" hidden />
+            <i class="fas fa-upload"></i> Choose File
+            <span id="fileName"></span>
+          </label>
+          <button id="loadVideo" class="btn primary">
+            <i class="fas fa-play"></i> Load Video
+          </button>
+        </div>
+      </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="player.js"></script>
-</body>
+      <div class="session-info card">
+        <div id="sessionHostInfo" style="display: none">
+          <h3>Session Host: <span id="hostName"></span></h3>
+          <div class="session-id-box">
+            Session ID: <span id="sessionIdDisplay"></span>
+            <button onclick="copySessionId()" class="btn icon">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+        </div>
+        <div class="participants-list">
+          <h3>Participants (<span id="participantCount">0</span>)</h3>
+          <ul id="participants"></ul>
+        </div>
+      </div>
+
+      <div class="chat-container card">
+        <ul id="messages"></ul>
+        <div class="chat-input">
+          <input id="messageInput" placeholder="Type a message..." />
+          <button id="sendButton" class="btn icon">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="player.js"></script>
+  </body>
 </html>
